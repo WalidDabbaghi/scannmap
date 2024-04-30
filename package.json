@@ -4,21 +4,32 @@
   "description": "",
   "main": "App.js",
   "scripts": {
+    "client": "cd client && npm start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "app": "node App.js ",
     "scann": "node scanner.js",
-    "server": "node server.js"
+    "server": "node server.js",
+    "serverrr": "node serverrr.js",
+    "dev": "concurrently \"npm run serverrr\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "child_process": "^1.0.2",
+    "concurrently": "^8.2.2",
+    "cors": "^2.8.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "fs": "^0.0.1-security",
     "http": "^0.0.1-security",
+    "nmap": "^1.1.0",
     "node-json2html": "^3.0.0",
+    "node-nmap": "^4.0.0",
+    "nodemailer": "^6.9.13",
+    "pdfkit": "^0.15.0",
+    "puppeteer": "^22.7.1",
+    "puppeteer-firefox": "^0.5.1",
     "xml-js": "^1.6.11",
     "xml2js": "^0.6.2",
     "xslt": "^0.9.1"

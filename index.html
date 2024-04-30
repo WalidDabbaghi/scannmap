@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Scanner Nmap et Rapport</title>
+</head>
+<body>
+  <h1>Scanner Nmap et Générer un Rapport</h1>
+  <button onclick="scanNmap()">Scanner</button>
+
+  <script>
+    function scanNmap() {
+      fetch('/scan')
+        .then(response => response.blob())
+        .then(blob => {
+          const file = new File([blob], 'report.pdf', {
+            type: 'application/pdf'
+          });
+          const url = URL.createObjectURL(file);
+          window.open(url, '_blank');
+        })
+        .catch(error => {
+          console.error(error);
+          alert('Erreur lors du scan Nmap');
+        });
+    }
+  </script>
+</body>
+</html>

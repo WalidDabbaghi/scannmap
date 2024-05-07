@@ -1,7 +1,7 @@
 // app.js
 const { exec } = require('child_process');
 
-exec('./myShellScript.sh', (error, stdout, stderr) => {
+exec('./nmap/myShellScript.sh', (error, stdout, stderr) => {
   if (error) {
     console.error(`Error: ${error.message}`);
     return;

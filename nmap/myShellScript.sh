@@ -2,14 +2,15 @@
 
 
 # Exécute la commande nmap pour scanner facebook.com et enregistrer les résultats dans resultttt.xml
-
-sudo sh -c "nmap google.com -oX resultttt.xml"
+# siteURL="$1"
+# sudo sh -c "nmap google.com -oX resultttt.xml"
+sudo sh -c "nmap google.com -oX ./nmap/resultttt.xml"
 
 # Exécute la commande xsltproc pour convertir le fichier XML en HTML
-xsltproc resultttt.xml -o res.html
+xsltproc ./nmap/resultttt.xml -o ./nmap/res.html
 # Supprimer les lignes contenant les ports et les services dans le fichier XML
 # sed -i '/services\/verbose\/level\/debugging\/services\|ports/d' resultttt.xml
-wkhtmltopdf -n res.html pdf_file_name.pdf
+wkhtmltopdf -n ./nmap/res.html ./nmap/pdf_file_name.pdf
 
 # # Utiliser xmlstarlet pour supprimer les attributs numservices et services de la balise scaninfo
 # xmlstarlet ed -L -d '//scaninfo/@numservices' -d '//scaninfo/@services' resultttt.xml

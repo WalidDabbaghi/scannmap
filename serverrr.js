@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 
-const server = require('./excutescript');
+const server = require('./nmap/excutescript');
 
 
 const PORT = process.env.PORT || 5000;

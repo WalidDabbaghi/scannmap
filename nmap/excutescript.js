@@ -7,12 +7,14 @@ const path = require('path');
 
 
 // Import des fonctions depuis les fichiers séparés
-const downloadPDF = require('./DownloadFile');
-const sendEmailWithAttachment = require('./SendEmail');
+const downloadPDF = require('../nmap/DownloadFile');
+const sendEmailWithAttachment = require('../nmap/SendEmail');
 const server = http.createServer((req, res) => {
-    if (req.url === '/scan') {
+ 
+    
+if(req.url === '/scan') {
       // Execute the shell script
-      exec('./myShellScript.sh', (error, stdout, stderr) => {
+      exec('./nmap/myShellScript.sh', (error, stdout, stderr) => {
         if (error) {
           console.error(`Error executing script: ${error.message}`);
           res.writeHead(500, { 'Content-Type': 'text/plain' });
@@ -22,13 +24,13 @@ const server = http.createServer((req, res) => {
         
         // Wait for a moment before redirecting to the scan result
         setTimeout(() => {
-          res.writeHead(302, { 'Location': '/result' });
+          res.writeHead(302, { 'Location': './nmap/result' });
           res.end();
         }, 10000); // Wait for 10 seconds (10000 ms) before redirecting
       });
     } else if (req.url === '/result') {
       // Read the resulting HTML file
-      const htmlPath = path.join(__dirname, 'res.html');
+      const htmlPath = path.join(__dirname, './nmap/res.html');
       fs.readFile(htmlPath, (err, data) => {
         if (err) {
           console.error(`Error reading HTML file: ${err.message}`);

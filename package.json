@@ -32,6 +32,7 @@
     "puppeteer-firefox": "^0.5.1",
     "xml-js": "^1.6.11",
     "xml2js": "^0.6.2",
-    "xslt": "^0.9.1"
+    "xslt": "^0.9.1",
+    "zaproxy": "^2.0.0-rc.4"
   }
 }

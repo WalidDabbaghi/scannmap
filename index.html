@@ -1,29 +1,43 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Scanner Nmap et Rapport</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OWASP ZAP Scanner</title>
 </head>
 <body>
-  <h1>Scanner Nmap et Générer un Rapport</h1>
-  <button onclick="scanNmap()">Scanner</button>
+    <label for="siteURL">URL du site à scanner :</label>
+    <input type="text" id="siteURL" placeholder="Entrez l'URL du site">
+    <button id="scanButton">Scan OWASP</button>
 
-  <script>
-    function scanNmap() {
-      fetch('/scan')
-        .then(response => response.blob())
-        .then(blob => {
-          const file = new File([blob], 'report.pdf', {
-            type: 'application/pdf'
-          });
-          const url = URL.createObjectURL(file);
-          window.open(url, '_blank');
+    <script>
+        document.getElementById("scanButton").addEventListener("click", function() {
+            const siteURL = document.getElementById("siteURL").value;
+            if (!siteURL) {
+                alert("Veuillez entrer l'URL du site.");
+                return;
+            }
+
+            // Envoyer une demande HTTP au serveur Node.js pour déclencher le scan OWASP
+            fetch('/scan', {
+                method: 'POST', // Utiliser la méthode POST pour éviter les problèmes de mise en cache
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ siteURL: siteURL })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Scan OWASP a été lancé.');
+                } else {
+                    alert('Erreur lors du lancement du scan OWASP.');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors du lancement du scan OWASP :', error);
+                alert('Erreur lors du lancement du scan OWASP.');
+            });
         })
-        .catch(error => {
-          console.error(error);
-          alert('Erreur lors du scan Nmap');
-        });
-    }
-  </script>
+    </script>
 </body>
 </html>

@@ -1,13 +1,19 @@
 #!/bin/bash
 
-
+chmod +x myShellScript.sh
 # Exécute la commande nmap pour scanner facebook.com et enregistrer les résultats dans resultttt.xml
-# siteURL="$1"
-# sudo sh -c "nmap google.com -oX resultttt.xml"
-sudo sh -c "nmap google.com -oX ./nmap/resultttt.xml"
+# url="$1"
+# Vérifie si un argument (l'URL) est passé au script
 
+
+url="$1"
+
+# sudo sh -c "nmap google.com -oX resultttt.xml"
+# sudo nmap $siteURL
+sudo sh -c "nmap "$url" -oX ./nmap/resultttt.xml"
+# sudo sh -c "nmap google.com -oX ./nmap/resultttt.xml"
 # Exécute la commande xsltproc pour convertir le fichier XML en HTML
-xsltproc ./nmap/resultttt.xml -o ./nmap/res.html
+ xsltproc ./nmap/resultttt.xml -o ./nmap/res.html
 # Supprimer les lignes contenant les ports et les services dans le fichier XML
 # sed -i '/services\/verbose\/level\/debugging\/services\|ports/d' resultttt.xml
 wkhtmltopdf -n ./nmap/res.html ./nmap/pdf_file_name.pdf

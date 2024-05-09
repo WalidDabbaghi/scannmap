@@ -10,12 +10,14 @@
     "scann": "node scanner.js",
     "server": "node server.js",
     "serverrr": "node serverrr.js",
+    "serv": "node serv.js",
     "dev": "concurrently \"npm run serverrr\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.20.2",
     "child_process": "^1.0.2",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",

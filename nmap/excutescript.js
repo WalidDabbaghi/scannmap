@@ -9,23 +9,21 @@ const path = require('path');
 const downloadPDF = require('../nmap/DownloadFile');
 const sendEmailWithAttachment = require('../nmap/SendEmail');
 const server = http.createServer((req, res) => {
-  if(req.url === '/scan') {
-      // Execute the shell script
-      exec('./nmap/myShellScript.sh', (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error executing script: ${error.message}`);
-          res.writeHead(500, { 'Content-Type': 'text/plain' });
-          res.end('Internal Server Error');
-          return;
-        }
-        
-        // Wait for a moment before redirecting to the scan result
-        setTimeout(() => {
-          res.writeHead(302, { 'Location': '/result' });
-          res.end();
-        }, 10000); // Wait for 10 seconds (10000 ms) before redirecting
-      });
-    } else if (req.url === '/result') {
+  if(req.url.startsWith('/scan')) {
+    const url = req.url.split('?')[1].split('=')[1]; // Récupère l'URL de la requête
+    const command = `./nmap/myShellScript.sh ${url}`; // Ajoute l'URL à votre commande shell
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing script: ${error.message}`);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Internal Server Error');
+        return;
+      }
+      // Faites quelque chose avec stdout (résultat de la commande shell)
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end(stdout);
+    });
+  } else if (req.url === '/result') {
       // Read the resulting HTML file
       const htmlPath = path.join(__dirname, 'res.html');
       fs.readFile(htmlPath, (err, data) => {
@@ -101,13 +99,23 @@ const server = http.createServer((req, res) => {
           res.writeHead(500, { 'Content-Type': 'text/plain' });
           res.end('Failed to send email');
         });
-    } else {
-      // Handle other requests
-      const buttonText = 'Scan Nmap';
-      const buttonAction = 'fetch("/scan").then(response => window.location.href = "/result").catch(error => console.error(error));';
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(`<button onclick="scan()">${buttonText}</button><script>function scan() { ${buttonAction} }</script>`);
-    }
+      } else {
+        // Handle other requests
+        const buttonText = 'Scan Nmap';
+        let buttonAction; // Déclarer buttonAction en dehors de la fonction scan()
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(`
+          <input type="text" id="urlInput" placeholder="Enter URL">
+          <button onclick="scan()">${buttonText}</button>
+          <script>
+            function scan() {
+              const url = document.getElementById('urlInput').value;
+              buttonAction = 'fetch("/scan?url=' + encodeURIComponent(url) + '").then(response => window.location.href = "/result").catch(error => console.error(error));';
+              eval(buttonAction); // Utiliser eval() pour exécuter la chaîne d'action
+            }
+          </script>
+        `);
+      }
   });
 
 

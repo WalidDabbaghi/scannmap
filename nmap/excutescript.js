@@ -4,11 +4,13 @@ const fs = require('fs');
 const path = require('path');
 
 
-
 // Import des fonctions depuis les fichiers séparés
 const downloadPDF = require('../nmap/DownloadFile');
 const sendEmailWithAttachment = require('../nmap/SendEmail');
-const server = http.createServer((req, res) => {
+const generateReportPDF = require('../nmap/generatePdf');
+let lastReportNumber = 1;
+ // Import the function
+const nmap = http.createServer((req, res) => {
   if(req.url.startsWith('/scan')) {
     const url = req.url.split('?')[1].split('=')[1]; // Récupère l'URL de la requête
     const command = `./nmap/myShellScript.sh ${url}`; // Ajoute l'URL à votre commande shell
@@ -36,48 +38,67 @@ const server = http.createServer((req, res) => {
   
         // Add the download PDF button and script to the HTML content
         const modifiedHTML = data.toString().replace('</body>', `
-          <button onclick="downloadPDF()">Download PDF</button>
-          <div>
+        <button onclick="downloadPDF()">Download PDF</button>
+        <div>
           <input type="email" id="emailInput" placeholder="Adresse email">
           <button onclick="sendPDFByEmail()">Envoyer par Email</button>
-        </div>
-          <script>
-            function downloadPDF() {
-              const xhr = new XMLHttpRequest();
-              xhr.open('GET', '/downloadPDF');
-              xhr.responseType = 'blob';  // Set response type to blob for binary data
-              xhr.onload = function() {
-                if (xhr.status === 200) {
-                  const blob = xhr.response;
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'pdf_file_name.pdf';
-                  a.click();
-                  window.URL.revokeObjectURL(url);  // Clean up temporary URL
-                } else {
-                  console.error('Error downloading PDF');
-                }
-              };
-              xhr.send();
-              
-            }
-            function sendPDFByEmail() {
-              const email = document.getElementById('emailInput').value;
-              fetch('/sendPDFByEmail?email=' + email).then(response => {
-                if (response.ok) {
-                  console.log('Email sent successfully');
-                } else {
-                  console.error('Error sending email');
-                }
-              }).catch(error => {
-                console.error('Error sending email:', error);
-              });
-            }
-          </script>
+          <button onclick="generateReportPDF()">Générer rapport PDF</button>
           
-        </body>
-        `);
+        </div>
+        <script>
+          function downloadPDF() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/downloadPDF');
+            xhr.responseType = 'blob';  // Set response type to blob for binary data
+            xhr.onload = function() {
+              if (xhr.status === 200) {
+                const blob = xhr.response;
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'pdf_file_name.pdf';
+                a.click();
+                window.URL.revokeObjectURL(url);  // Clean up temporary URL
+              } else {
+                console.error('Error downloading PDF');
+              }
+            };
+            xhr.send();
+          }
+      
+          function sendPDFByEmail() {
+            const email = document.getElementById('emailInput').value;
+            fetch('/sendPDFByEmail?email=' + email).then(response => {
+              if (response.ok) {
+                console.log('Email sent successfully');
+              } else {
+                console.error('Error sending email');
+              }
+            }).catch(error => {
+              console.error('Error sending email:', error);
+            });
+          }
+          
+          function generateReportPDF() {
+            // Appeler la fonction externe pour générer le rapport PDF
+            fetch('/generateReportPDF').then(response => {
+              if (response.ok) {
+                console.log('Rapport PDF généré avec succès');
+              } else {
+                console.error('Erreur lors de la génération du rapport PDF');
+              }
+            }).catch(error => {
+              console.error('Erreur lors de la génération du rapport PDF:', error);
+            });
+          }
+      
+      
+          
+        </script>
+      </body>
+      `);
+      
+      
   
         // Send the modified HTML content to the client
         res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -86,6 +107,38 @@ const server = http.createServer((req, res) => {
     } else if (req.url === '/downloadPDF') {
       // Handle downloading the PDF file
       downloadPDF(req, res);
+    } else if (req.url === '/generateReportPDF'){
+      
+      // Handle downloading the PDF file
+      const htmlFilePath = path.join(__dirname, '../nmap/templatee.html'); // Chemin vers votre fichier HTML
+        const pdfFilePath = path.join(__dirname, `../nmap/docs/rapportnmap_${lastReportNumber}.pdf`); // Chemin pour enregistrer le rapport PDF
+        generateReportPDF(htmlFilePath, pdfFilePath).then(() => {
+          // Lorsque le rapport PDF est généré avec succès
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          res.end('Rapport PDF généré avec succès');
+
+          // Mettre à jour le numéro de version pour le prochain rapport
+          lastReportNumber++;
+      }).catch(error => {
+          // Réponse en cas d'erreur lors de la génération du rapport PDF
+          console.error('Erreur lors de la génération du rapport PDF:', error);
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Erreur lors de la génération du rapport PDF');
+      });
+  } else if (req.url === '/downloadLatestReport') {
+      // Télécharger le dernier rapport généré
+      const lastReportFilePath = path.join(__dirname, `../nmap/docs/rapportnmap_${lastReportNumber - 1}.pdf`);
+      fs.readFile(lastReportFilePath, (err, data) => {
+          if (err) {
+              console.error('Erreur lors de la lecture du fichier PDF:', err);
+              res.writeHead(500, { 'Content-Type': 'text/plain' });
+              res.end('Erreur lors de la lecture du fichier PDF');
+          } else {
+              res.setHeader('Content-Type', 'application/pdf');
+              res.setHeader('Content-Disposition', `attachment; filename=rapportnmap_${lastReportNumber - 1}.pdf`);
+              res.end(data);
+          }
+      });
     } else if (req.url.startsWith('/sendPDFByEmail')) {
       // Extraire l'adresse email à partir de l'URL
       const email = req.url.split('=')[1];
@@ -119,4 +172,4 @@ const server = http.createServer((req, res) => {
   });
 
 
-module.exports = server;
+module.exports = nmap;

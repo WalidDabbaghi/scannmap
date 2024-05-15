@@ -1,14 +1,13 @@
-const http = require('http');
-const { exec } = require('child_process');
-const fs = require('fs');
+
 const path = require('path');
 
 
-const server  = require('./nmap/excutescript');
+const nmap  = require('./nmap/excutescript');
 
+// nmap.use('/docs', express.static(path.join(__dirname, './docs')));
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+nmap.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

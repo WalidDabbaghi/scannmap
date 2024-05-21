@@ -27,6 +27,7 @@
     "fs": "^0.0.1-security",
     "html2pdf.js": "^0.9.0",
     "http": "^0.0.1-security",
+    "jsdom": "^24.0.0",
     "jspdf": "^2.5.1",
     "nmap": "^1.1.0",
     "node-json2html": "^3.0.0",

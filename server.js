@@ -1,17 +1,37 @@
 const express = require('express');
-const expressLayouts = require('express-ejs-layouts');
+const { exec } = require('child_process');
 const path = require('path');
-const homeRoutes = require('./generrapport/routes/home-routes');
 
 const app = express();
+const port = 3000;
 
+// Route pour servir le fichier HTML directement
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './indexx.html'));
+});
 
-app.use(expressLayouts);
-app.set('view engine', 'ejs');
+// Route pour exécuter le script shell
+app.get('/execute-script', (req, res) => {
+    const scriptPath = path.join(__dirname, './nmap/generatepdf.sh');
+    const inputHtml = path.join(__dirname, './nmap/templatee.html');
+    const outputPdf = path.join(__dirname, 'output123.pdf');
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/docs', express.static(path.join(__dirname, 'docs')));
-app.use(homeRoutes.routes);
+    exec(`${scriptPath} ${inputHtml} ${outputPdf}`, (error, stdout, stderr) => {
+        if (error) {
+            res.status(500).send(`Erreur lors de l'exécution du fichier shell : ${error.message}`);
+            return;
+        }
 
+        if (stderr) {
+            res.status(500).send(`Erreurs : ${stderr}`);
+            return;
+        }
 
-app.listen(3000, () => console.log('App is listening on url http://localhost:3000'));
+        res.send(`Sortie : ${stdout}`);
+    });
+});
+
+// Démarrage du serveur
+app.listen(port, () => {
+    console.log(`Serveur en écoute sur http://localhost:${port}`);
+});

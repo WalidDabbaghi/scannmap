@@ -43,6 +43,7 @@ const nmap = http.createServer((req, res) => {
           <input type="email" id="emailInput" placeholder="Adresse email">
           <button onclick="sendPDFByEmail()">Envoyer par Email</button>
           <button onclick="generateReportPDF()">Générer rapport PDF</button>
+          <button onclick="rapport()">rapport</button>
           
         </div>
         <script>
@@ -91,7 +92,17 @@ const nmap = http.createServer((req, res) => {
               console.error('Erreur lors de la génération du rapport PDF:', error);
             });
           }
-      
+          function rapport() {
+            fetch("/scan?url=")
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = "/rapport";
+                    } else {
+                        console.error('Failed to fetch');
+                    }
+                })
+                .catch(error => console.error(error));
+        }
       
           
         </script>
@@ -104,6 +115,87 @@ const nmap = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(modifiedHTML);
       });
+    } else if (req.url === '/rapport') {
+      const xmlPath = path.join(__dirname, 'resultttt.xml');
+      const htmlPath = path.join(__dirname, 'templatee.html');
+  
+      // Lire le fichier XML en premier
+      fs.readFile(xmlPath, 'utf8', (err, xmlData) => {
+          if (err) {
+              console.error(`Error reading XML file: ${err.message}`);
+              res.writeHead(500, { 'Content-Type': 'text/plain' });
+              res.end('Internal Server Error');
+              return;
+          }
+  
+          // Lire le fichier HTML ensuite
+          fs.readFile(htmlPath, 'utf8', (err, htmlData) => {
+              if (err) {
+                  console.error(`Error reading HTML file: ${err.message}`);
+                  res.writeHead(500, { 'Content-Type': 'text/plain' });
+                  res.end('Internal Server Error');
+                  return;
+              }
+  
+              // Insérer les données XML dans le HTML
+              const script = `
+              <script>
+                  // Charger les données XML à partir de la réponse du serveur
+                  var parser = new DOMParser();
+                  var xmlData = parser.parseFromString(\`${xmlData.replace(/`/g, '\\`')}\`, 'application/xml');
+  
+                  // Extraction des données nécessaires
+                  var startstr = xmlData.getElementsByTagName('nmaprun')[0].getAttribute('startstr');
+                  var addr = xmlData.getElementsByTagName('address')[0].getAttribute('addr');
+                  var name = xmlData.getElementsByTagName('hostname')[0].getAttribute('name');
+                  var protocol = xmlData.getElementsByTagName('port')[0].getAttribute('protocol');
+                  var protocol1 = xmlData.getElementsByTagName('port')[1].getAttribute('protocol');
+                  var portid = xmlData.getElementsByTagName('port')[0].getAttribute('portid');
+                  var portid1 = xmlData.getElementsByTagName('port')[1].getAttribute('portid');
+                  var state = xmlData.getElementsByTagName('state')[0].getAttribute('state');
+  
+                  // Insérer les données dans le modèle HTML
+                  document.querySelectorAll('.time').forEach(function(balise) {
+                      balise.textContent = startstr;
+                  });
+                  document.querySelectorAll('.adresse').forEach(function(balise) {
+                      balise.textContent = addr;
+                  });
+                  document.querySelectorAll('.nomHote').forEach(function(balise) {
+                      balise.textContent = name;
+                  });
+                  document.querySelectorAll('.protocole').forEach(function(balise) {
+                      balise.textContent = protocol;
+                  });
+                  document.querySelectorAll('.port').forEach(function(balise) {
+                      balise.textContent = portid;
+                  });
+                  document.querySelectorAll('.protocole1').forEach(function(balise) {
+                      balise.textContent = protocol1;
+                  });
+                  document.querySelectorAll('.port1').forEach(function(balise) {
+                      balise.textContent = portid1;
+                  });
+                  document.querySelectorAll('.etatPort').forEach(function(balise) {
+                      balise.textContent = state;
+                  });
+              </script>
+              `;
+  
+              // Ajouter le script avant la balise de fermeture </body>
+              const modifiedHtml = htmlData.replace('</body>', `
+              <button onclick="generateReportPDF()">Générer rapport PDF</button>
+              ${script}</body>`);
+  
+              // Attendre un moment avant de répondre avec le fichier HTML modifié
+              setTimeout(() => {
+                  res.writeHead(200, { 'Content-Type': 'text/html' });
+                  res.end(modifiedHtml);
+              }, 3000); // Attendre 3 secondes (3000 ms) avant de répondre
+          });
+      });
+  
+
     } else if (req.url === '/downloadPDF') {
       // Handle downloading the PDF file
       downloadPDF(req, res);

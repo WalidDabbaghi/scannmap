@@ -16,8 +16,8 @@ sudo sh -c "nmap "$url" -oX ./nmap/resultttt.xml"
  xsltproc ./nmap/resultttt.xml -o ./nmap/res.html
 # Supprimer les lignes contenant les ports et les services dans le fichier XML
 # sed -i '/services\/verbose\/level\/debugging\/services\|ports/d' resultttt.xml
-wkhtmltopdf -n ./nmap/res.html ./nmap/pdf_file_name.pdf
-wkhtmltopdf -n ./nmap/templatee.html ./nmap/pdf_rapport_name.pdf
+wkhtmltopdf -s "A4" -n ./nmap/res.html ./nmap/pdf_file_name.pdf
+# wkhtmltopdf -n ./nmap/templatee.html ./nmap/pdf_rapport_name.pdf
 # # Utiliser xmlstarlet pour supprimer les attributs numservices et services de la balise scaninfo
 # xmlstarlet ed -L -d '//scaninfo/@numservices' -d '//scaninfo/@services' resultttt.xml
 # xmlstarlet ed -L -d '//nmaprun/@args' -d '//nmaprun/@start' resultttt.xml

@@ -184,7 +184,7 @@ const nmap = http.createServer((req, res) => {
       // Extraire l'adresse email à partir de l'URL
       const email = req.url.split('=')[1];
       // Envoyer le PDF par email
-      sendEmailWithAttachment(email, path.join(__dirname, 'pdf_file_name.pdf'))
+      sendEmailWithAttachment(email, path.join(__dirname, '../nmap/docs/rapportnmap_3.pdf'))
         .then(() => {
           res.writeHead(200, { 'Content-Type': 'text/plain' });
           res.end('Email sent successfully');

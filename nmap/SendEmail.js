@@ -20,7 +20,7 @@ async function sendEmailWithAttachment(email, attachmentPath) {
         text: 'Veuillez trouver le fichier PDF en pièce jointe.', // Corps de l'email
         attachments: [
           {
-            filename: 'pdf_file_name.pdf', // Nom du fichier PDF en pièce jointe
+            filename: 'nmapscan.pdf', // Nom du fichier PDF en pièce jointe
             path: attachmentPath // Chemin du fichier PDF
           }
         ]
@@ -36,28 +36,6 @@ async function sendEmailWithAttachment(email, attachmentPath) {
     }
   }
   
-  function sendPDFByEmail() {
-    const emailInput = document.getElementById('emailInput');
-    const email = emailInput.value;
-    
-    sendEmailWithAttachment(email, '/path/to/attachment.pdf')
-      .then(success => {
-        if (success) {
-          // Afficher le message dans la page web
-          const successMessage = document.createElement('div');
-          successMessage.textContent = 'Email sent successfully';
-          document.body.appendChild(successMessage);
   
-          // Vider le champ d'adresse email
-          emailInput.value = '';
-        } else {
-          console.error('Error sending email');
-        }
-      })
-      .catch(error => {
-        console.error('Error sending email:', error);
-      });
-  }
-
 
 module.exports = sendEmailWithAttachment;
